@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://org.thymeleaf.com">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Management System</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        table{
+           display:flex;
+           justify-content:center;
+        }
+        td{
+           padding:8px 10px;
+           margin:8px;
+           border:1px solid grey;
+           border-radius:7px;
+           text-align:center;
+        }
+        tr:nth-Child(odd){
+           background-color:#e9f3fd;
+        }
+        tr:first-child{
+           background-color:#c2daf3;
+        }
+        #updatebox, #insertbox{
+           border: 1px solid black;
+           background-color:#f3f3f3;
+           border-radius: 5px;
+           padding:1em 3em;
+           position: absolute;
+           top: 30%;
+           left: 50%;
+           transform: translate(-50%, -50%);
+           z-index:5px;
+           display:none;
+        }
+        #updatebox input, #insertbox input{
+           margin:5px;
+           padding:2px;
+           <!--border:1.5px solid grey;-->
+           width:80%;
+        }
+        #updt-btn{
+           color:white;
+           margin:5px 5px;
+           padding:5px 10px;
+           border:none;
+           border-radius:3px;
+           background-color:#1dbf40;
+        }
+        #del-btn{
+           color:white;
+           margin:5px 5px;
+           padding:5px 10px;
+           border:none;
+           border-radius:3px;
+           background-color:red;
+        }
+        #info-box{
+           margin:5px 5px;
+           padding:5px 10px;
+           border-radius:3px;
+           border:1px solid grey;
+           background-color:#f3f3f3;
+        }
+    </style>
+</head>
+<body>
+
+     <div id="updatebox" >
+         <p>Update Employee with id: <strong id="u-id"></strong></p>
+         <label>Employee name:</label><br>
+         <input type="text" name="name" id="u-name" placeholder="Enter Employee Name"><br>
+         <label>Employee Address:</label><br>
+         <input type="text" name="address" id="u-address" placeholder="Enter Employee Address"><br>
+         <label>Employee Project Name:</label><br>
+         <input type="text" name="projectname" id="u-projectName" placeholder="Enter Employee Project Name"><br>
+
+         <button type="button" onclick="mainupdate()"  id="updt-btn">Update</button>
+         <button type="button" onclick="closing('#updatebox')" id="del-btn">Close</button>
+     </div>
+        <div id="insertbox" >
+            <p>Insert Employee</p>
+            <label>Employee Id:</label><br>
+            <input type="number" name="id" id="i-id" placeholder="Enter Employee Id"><br>
+            <label>Employee name:</label><br>
+            <input type="text" name="name" id="i-name" placeholder="Enter Employee Name"><br>
+            <label>Employee Address:</label><br>
+            <input type="text" name="address" id="i-address" placeholder="Enter Employee Address"><br>
+            <label>Employee Project Name:</label><br>
+            <input type="text" name="projectname" id="i-projectName" placeholder="Enter Employee Project Name"><br>
+
+            <button type="button" onclick="insertEmp()" id="updt-btn">Insert</button>
+            <button type="button" onclick="closing('#insertbox')" id="del-btn">Close</button>
+            <div style="color:red;" id="i-alert"></div>
+        </div>
+     <table>
+         <tr>
+             <td>Employee Id</td>
+             <td>Employee Name</td>
+             <td>Employee Address</td>
+             <td>Employee Project Name</td>
+             <td>Employee Delete</td>
+             <td>Employee Update</td>
+         </tr>
+         <tr th:each="emp : ${employees}">
+             <td th:text="${emp.employeeId}"></td>
+             <td th:text="${emp.employeeName}"></td>
+             <td th:text="${emp.employeeAddress}"></td>
+             <td th:text="${emp.employeeProjectName}"></td>
+             <td><button id="del-btn" onclick="fundelete(this.value)" th:value="${emp.employeeId}">Delete</button></td>
+             <td><button id="updt-btn" onclick="funupdate(this.value)" th:value="${ emp.employeeId + ',' + emp.employeeName + ',' + emp.employeeAddress + ',' + emp.employeeProjectName }">Update</button></td>
+         </tr>
+     </table>
+<div style="display:flex;justify-content:center;"><button style="font-size:1.2rem; font-weight:500;" onclick="showInsertBox()" id="updt-btn">Insert A New Employee Details</button></div>
+
+<br><hr>
+<!--<div id="info-box">-->
+    <!--<h4>Some Info About Project :</h4>-->
+    <!--<ul>-->
+        <!--<li>For Backend (Spring boot):</li>-->
+        <!--<ul>-->
+            <!--<li>JpaRepository</li>-->
+            <!--<li>RestControllers</li>-->
+            <!--<li>ModelAndView</li>-->
+            <!--<li>Thymeleaf Html Templete</li>-->
+        <!--</ul>-->
+        <!--<li>For Frontend:</li>-->
+        <!--<ul>-->
+            <!--<li>Used Jquery JavaScript Library</li>-->
+            <!--<li>Used JQuery-Ajax for Sending Data to Backend</li>-->
+        <!--</ul>-->
+    <!--</ul>-->
+<!--</div>-->
+
+<script>
+    function fundelete(e){
+        if(confirm("Delete the Employee with Id: "+e)){
+        $.ajax
+        ({
+          type: "POST",
+          url: "/employee/"+e,
+          data: {},
+          success: function (data) {
+            //alert(data);
+            location.replace("/employee-manage");
+          }
+        });
+        }
+        else{
+            alert("not deleted");
+        }
+    }
+
+    function funupdate(e){
+        var val=e.split(",")
+        $("#u-id").html(val[0]);
+        $("#updatebox #u-name").val(val[1]);
+        $("#updatebox #u-address").val(val[2]);
+        $("#updatebox #u-projectName").val(val[3]);
+        $("#updatebox").show();
+    }
+
+    function mainupdate(){
+    var id=$("#u-id").html();
+    var name=$("#u-name").val();
+    var address=$("#u-address").val();
+    var projectName=$("#u-projectName").val();
+
+   // alert(projectName);
+
+        $.ajax
+        ({
+          type: "PUT",
+          url: "/employee",
+          data: {"employeeId":id, "employeeName":name, "employeeAddress":address, "employeeProjectName":projectName},
+          success: function (data) {
+            alert(data);
+            location.replace("/employee-manage");
+          }
+        });
+    }
+
+    function showInsertBox(){
+    $("#insertbox").show();
+    }
+
+   function insertEmp(){
+        var id=$("#i-id").val();
+        var name=$("#i-name").val();
+        var address=$("#i-address").val();
+        var projectName=$("#i-projectName").val();
+            $.ajax
+            ({
+              type: "POST",
+              url: "/employee",
+              data: {"employeeId":id, "employeeName":name, "employeeAddress":address, "employeeProjectName":projectName},
+              success: function (data) {
+                if(data == "Employee details saved !"){
+                    alert("Record Inserted !");
+                    location.replace("/employee-manage");
+                }
+                else{
+                    $("#i-alert").html("Error in Inserting ! May be Id is Occupied !");
+                }
+
+              }
+            });
+   }
+
+    function closing(e){
+      $(e).hide();
+    }
+</script>
+</body>
+</html>

@@ -83,11 +83,11 @@
             <groupId>org.springframework.batch</groupId>
             <artifactId>spring-batch-core</artifactId>
         </dependency>
-		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-core</artifactId>
-			<version>5.2.4</version>
-		</dependency>
+		<!--<dependency>-->
+			<!--<groupId>org.flywaydb</groupId>-->
+			<!--<artifactId>flyway-core</artifactId>-->
+			<!--<version>5.2.4</version>-->
+		<!--</dependency>-->
 
     </dependencies>
 
@@ -118,11 +118,11 @@
 							<artifactId>lombok</artifactId>
 							<version>1.16.18</version>
 						</path>
-						<path>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok-mapstruct-binding</artifactId>
-							<version>0.2.0</version>
-						</path>
+						<!--<path>-->
+							<!--<groupId>org.projectlombok</groupId>-->
+							<!--<artifactId>lombok-mapstruct-binding</artifactId>-->
+							<!--<version>0.2.0</version>-->
+						<!--</path>-->
 						<!--<path>-->
 							<!--<groupId>org.mapstruct</groupId>-->
 							<!--<artifactId>mapstruct-processor</artifactId>-->

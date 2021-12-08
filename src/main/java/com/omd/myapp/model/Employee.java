@@ -1,58 +1,26 @@
 package com.omd.myapp.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import lombok.*;
+
+import javax.persistence.*;
 
 @Entity
+/** @Data [Equals to::: @ToString, @EqualsAndHashCode, @Getter on all fields, @Setter on all non-final fields, and @RequiredArgsConstructor]**/
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+@Table(name = "EMPLOYEE_DETAILS")
 public class Employee {
     @Id
     //@GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id")
     private Long employeeId;
+    @Column(name="employee_name")
     private String employeeName;
+    @Column(name="employee_address")
     private String employeeAddress;
+    @Column(name="project_name")
     private String employeeProjectName;
-
-    public Employee() {
-    }
-
-    public Employee(Long employeeId, String employeeName, String employeeAddress, String employeeProjectName) {
-        this.employeeId = employeeId;
-        this.employeeName = employeeName;
-        this.employeeAddress = employeeAddress;
-        this.employeeProjectName = employeeProjectName;
-    }
-
-    public Long getEmployeeId() {
-        return employeeId;
-    }
-
-    public void setEmployeeId(Long employeeId) {
-        this.employeeId = employeeId;
-    }
-
-    public String getEmployeeName() {
-        return employeeName;
-    }
-
-    public void setEmployeeName(String employeeName) {
-        this.employeeName = employeeName;
-    }
-
-    public String getEmployeeAddress() {
-        return employeeAddress;
-    }
-
-    public void setEmployeeAddress(String employeeAddress) {
-        this.employeeAddress = employeeAddress;
-    }
-
-    public String getEmployeeProjectName() {
-        return employeeProjectName;
-    }
-
-    public void setEmployeeProjectName(String employeeProjectName) {
-        this.employeeProjectName = employeeProjectName;
-    }
 }

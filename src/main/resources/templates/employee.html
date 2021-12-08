@@ -138,7 +138,7 @@
         if(confirm("Delete the Employee with Id: "+e)){
         $.ajax
         ({
-          type: "POST",
+          type: "DELETE",
           url: "/employee/"+e,
           data: {},
           success: function (data) {
@@ -211,6 +211,7 @@
     function closing(e){
       $(e).hide();
     }
+
 </script>
 </body>
 </html>

@@ -30,7 +30,6 @@ public class EmployeeController {
 
     @PutMapping("/employee")
     public String updateEmployee(Employee emp){
-        System.out.println(emp);
         return employeeService.updateEmployee(emp);
     }
 }

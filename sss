@@ -1,0 +1,126 @@
+package com.omd.myapp.config;
+
+import com.omd.myapp.model.Employee;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
+import org.springframework.batch.item.database.JdbcBatchItemWriter;
+import org.springframework.batch.item.file.FlatFileItemReader;
+import org.springframework.batch.item.file.FlatFileItemWriter;
+import org.springframework.batch.item.file.LineMapper;
+import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
+import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
+import org.springframework.batch.item.file.mapping.DefaultLineMapper;
+import org.springframework.batch.item.file.transform.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+
+import javax.sql.DataSource;
+
+@Configuration
+@EnableBatchProcessing
+public class BatchConfig {
+
+    @Autowired
+    private JobBuilderFactory jobBuilderFactory;
+
+    @Autowired
+    private StepBuilderFactory stepBuilderFactory;
+
+    @Autowired
+    private DataSource dataSource;
+
+    @Bean
+    public FlatFileItemReader<Employee> reader(){
+        FlatFileItemReader<Employee> reader= new FlatFileItemReader<>();
+        reader.setResource(new ClassPathResource("emp.txt"));
+        reader.setLineMapper(getLineMapper());
+        return reader;
+    }
+
+    private LineMapper<Employee> getLineMapper() {
+        DefaultLineMapper<Employee> lineMapper=new DefaultLineMapper<>();
+
+        FixedLengthTokenizer fixedLengthTokenizer =fixedLengthTokenizer();
+        //DelimitedLineTokenizer fixedLengthTokenizer=new DelimitedLineTokenizer();
+        //fixedLengthTokenizer.setNames(new String[]{"employeeName","employeeAddress","employeeProjectName"});
+//        fixedLengthTokenizer.setIncludedFields(new int[]{1,2,3});
+        BeanWrapperFieldSetMapper<Employee> fieldsetter=new BeanWrapperFieldSetMapper<>();
+        fieldsetter.setTargetType(Employee.class);
+        lineMapper.setLineTokenizer(fixedLengthTokenizer);
+        lineMapper.setFieldSetMapper(fieldsetter);
+
+        return lineMapper;
+    }
+
+    @Bean
+    public FixedLengthTokenizer fixedLengthTokenizer() {
+        FixedLengthTokenizer tokenizer = new FixedLengthTokenizer();
+
+        tokenizer.setNames("employeeId", "employeeName","employeeAddress","employeeProjectName");
+        tokenizer.setColumns(new Range(1, 1),
+                new Range(2, 8),
+                new Range(9, 14),
+                new Range(15, 24));
+
+        return tokenizer;
+    }
+
+    //for processor
+    @Bean
+    public EmployeeProcessor processor(){
+        return new EmployeeProcessor();
+
+    }
+
+    //for writer
+//    @Bean
+//    public JdbcBatchItemWriter<Employee> writer(){
+//        JdbcBatchItemWriter<Employee> writer=new JdbcBatchItemWriter<>();
+//        writer.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<Employee>());
+////        writer.setSql("insert into employee(employee_id,employee_name,employee_address,employee_project_name) values(:employeeId,:employeeName,:employeeAddress,:employeeProjectName)");
+//        writer.setSql("insert into employee(employee_name,employee_address,employee_project_name) values(:employeeName,:employeeAddress,:employeeProjectName)");
+//
+//        writer.setDataSource(this.dataSource);
+//        return writer;
+//
+//    }
+    @Bean
+    public FlatFileItemWriter<Employee> itemWriter(){
+        return new FlatFileItemWriterBuilder<Employee>()
+                .name("customerCreditWriter")
+                .resource(new FileSystemResource("output.txt"))
+                .formatted()
+                .format("")
+                .names(new String[] {"employeeId", "employeeName","employeeAddress","employeeProjectName"})
+                .build();
+    }
+
+    //creating job
+    @Bean
+    public Job empJob(){
+        return this.jobBuilderFactory.get("empJob")
+                .incrementer(new RunIdIncrementer())
+                .flow(step1())
+                .end()
+                .build();
+    }
+
+    @Bean
+    public Step step1() {
+        return this.stepBuilderFactory.get("step1")
+                .<Employee,Employee>chunk(10)
+                .reader(reader())
+                .processor(processor())
+                .writer(itemWriter())
+                .build();
+    }
+}
